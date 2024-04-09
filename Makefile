@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -std=c++11 -Wall
+CXXFLAGS = -std=c++11 -Wall -ggdb
 
 SOURCES = SplayTree.cpp splay_tree_test.cpp 
 OBJECTS = $(SOURCES:.cpp=.o)
@@ -15,5 +15,5 @@ splay_tree_test: $(OBJECTS)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(EXECUTABLE) $(OBJECTS)
+	rm -f splay_tree_test $(OBJECTS)
 

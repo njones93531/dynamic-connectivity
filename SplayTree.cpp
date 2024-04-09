@@ -1,136 +1,163 @@
 #include <iostream>
 #include "SplayTree.h"
-using namespace SplayTree;
-typedef struct Node {
-  int val;
-  int key;
-  struct Node* left;
-  struct Node* right;
-  struct Node* parent;
-  Node(int key, int val){
-    this->left = NULL;
-    this->right = NULL;
-    this->val = val;
-    this->key = key;
-  }
-} Node;
+using namespace std;
  
-SplayTree() : root(nullptr) {}
+SplayTree::SplayTree() : root(nullptr) {}
 
-void find(int key){
-  root = splay(no_splay_find(root, key));
+//Assumes node with rank rank exists 
+void SplayTree::find_rank(int rank){
+  SplayTree::splay(no_splay_rank(root, rank));
+}
+
+//O(1) rank deprecated 
+int SplayTree::get_rank(Node * e){
+  if(e == NULL || e->left == NULL) return 0;
+  return SplayTree::get_subtree_size(e->left);
+}
+
+int SplayTree::get_subtree_size(Node * e){
+  if(e == NULL) return 0;
+  return e->subtree_size;
 }
 
 //Assumes no duplicate keys
-void insert(int key, int val){
-  root = no_splay_insert(root, key, val);
-  find(key);
+void SplayTree::insert(int rank, int val){
+  root = SplayTree:: no_splay_insert(root, rank, val, NULL);
+  SplayTree::find_rank(rank);
 }
 
-void del(int key){
-  //After find, e is at root
-  find(key);
-  Node * e = root;
-  root = join(e->left, e->right);
+void SplayTree:: del(int rank){
+  //After rank, e is at root
+  SplayTree::find_rank(rank);
+  SplayTree::Node * e = root;
+  root = SplayTree::join(e->left, e->right);
   delete e;
 }
 
-void print_val(){
-  print_subtree_val(root);
+void SplayTree:: print_val(){
+  SplayTree:: print_subtree_val(root);
 }
 
-void print_key(){
-  print_subtree_key(root);
+void SplayTree:: print_rank(){
+  SplayTree:: print_subtree_rank(root);
 }
-     
+
+
 //Assume e is the child of a non-null node
-void rotate_up(Node * e){
+void SplayTree:: rotate_up(SplayTree::Node * e){
+  SplayTree::Node * f = e->parent;
   //If e is left child
-  if(e->key < e->parent->key){
-    Node * orphan = e->right;
-    e->right = e->parent;
-    e->parent = e->parent->parent;
-    e->right->left = orphan;
+  if((e) == e->parent->left){
+    //SplayTree::Node * A = e->left;
+    SplayTree::Node * B = e->right;
+    //SplayTree::Node * C = e->parent->right;
+    e->right = f;
+    e->parent = f->parent;
+    if(B!=NULL) B->parent = f;
+    f->parent = e;
+    f->left = B;
   }
   else{
-    Node * orphan = e->left;
-    e->left = e->parent;
-    e->parent = e->parent->parent;
-    e->left->right = orphan;
+    //SplayTree::Node * A = f->left;
+    SplayTree::Node * B = e->left;
+    //SplayTree::Node * C = e->right;
+    e->left = f;
+    e->parent = f->parent;
+    if(B!=NULL) B->parent = f;
+    f->parent = e;
+    f->right = B;
   }
+    if(e->parent){
+      if(e->parent->left == f) e->parent->left = e;
+      else e->parent->right = e;
+    }
+    f->subtree_size = SplayTree::get_subtree_size(f->left) + SplayTree::get_subtree_size(f->right) + 1;
+    e->subtree_size = SplayTree::get_subtree_size(e->left) + SplayTree::get_subtree_size(e->right) + 1;
 }
 
-Node * splay(Node * e){
+//Postcondition: e is root
+SplayTree::Node * SplayTree:: splay(SplayTree::Node * e){
   //If root, return
-  if(e->parent == NULL) return e;
+  if(e->parent == NULL){
+    root = e;
+    return e;
+  }
   //If parent is root, rotate up
   if(e->parent->parent == NULL){
-    rotate_up(e);
+    SplayTree:: rotate_up(e);
+    root = e;
     return e;
   }
   //If element is "in-line" with parent and grandparent, rotate parent, then e
-  //If a and b have same sign, then "in-line" = True
-  if((e->key - e->parent->key < 0) == (e->parent->key - e->parent->parent->key < 0)){
-    rotate_up(e->parent);
-    rotate_up(e);
+  //If if e and e-> parent are both left or both not left children, they are "in line" 
+ if((e == e->parent->left) == (e->parent == e->parent->parent->left)){
+    SplayTree:: rotate_up(e->parent);
+    SplayTree:: rotate_up(e);
   }
   else{
-    rotate_up(e);
-    rotate_up(e);
+    SplayTree:: rotate_up(e);
+    SplayTree:: rotate_up(e);
   }
-  return splay(e);
+  return SplayTree:: splay(e);
 }
 
-//Return e if it exists, otherwise return NULL
-Node * no_splay_find(Node * subroot, int key){
-  if(subroot==NULL || key == subroot->key) return subroot;
-  if(key < subroot->key) return no_splay_find(subroot->left, key);
-  return no_splay_find(subroot->right, key);
+//Assumes node with rank *rank* exists
+SplayTree::Node * SplayTree:: no_splay_rank(SplayTree::Node * subroot, int rank){
+  if(rank == get_rank(subroot)) return subroot;
+  if(rank < get_rank(subroot)) return SplayTree:: no_splay_rank(subroot->left, rank);
+  return SplayTree:: no_splay_rank(subroot->right, rank - (1+get_subtree_size(subroot->left)));
 }
 
-Node * no_splay_insert(Node * subroot, int key, int val){
-  if(subroot==NULL) return new Node(key, val);
-  if(key < subroot->key){
-    subroot->left = no_splay_insert(subroot->left, key, val);
-    subroot->left->parent = subroot;
+SplayTree::Node * SplayTree:: no_splay_insert(SplayTree::Node * subroot, int rank, int val, Node* p){
+  if(subroot==NULL) return new SplayTree::Node(val, p);
+  if(rank < get_rank(subroot)){
+    subroot->left = SplayTree:: no_splay_insert(subroot->left, rank, val, subroot);
   }else{
-    subroot->right = no_splay_insert(subroot->right, key, val); 
-    subroot->right->parent = subroot;
+    subroot->right = SplayTree:: no_splay_insert(subroot->right, rank - (1+get_subtree_size(subroot->left)), val, subroot); 
   }
+  subroot->subtree_size += 1;
   return subroot;
 }
 
-Node * max(Node * subroot){
+SplayTree::Node * SplayTree:: max(SplayTree::Node * subroot){
   if(subroot == NULL) return NULL;
   if(subroot->right == NULL) return subroot;
-  return splay(max(subroot->right));
+  return SplayTree:: splay(max(subroot->right));
 }
 
-Node * min(Node * subroot){
+SplayTree::Node * SplayTree:: min(SplayTree::Node * subroot){
   if(subroot == NULL) return NULL;
   if(subroot->left == NULL) return subroot;
-  return splay(min(subroot->left));
+  return SplayTree:: splay(min(subroot->left));
 }
 
-Node * join(Node * left, Node * right){       
-  left = max(left);
+SplayTree::Node * SplayTree:: join(SplayTree::Node * left, SplayTree::Node * right){       
+  left = SplayTree:: max(left);
   left->right = right;
   return left;
 }
 
-void print_subtree_key(Node * subroot){
-  if (subroot == NULL) return;
-  print_subtree_key(subroot->left);
-  cout << subroot->key << endl;
-  print_subtree_key(subroot->right);
+void SplayTree:: split(int rank, SplayTree::Node * subroot, SplayTree::Node ** a, SplayTree::Node ** b){       
+  //Splay the element with rank *rank* to the root
+  find_rank(rank);
+  root->right->parent = NULL;
+  *b = root->right; 
+  root->right = NULL;
+  *a = root;
 }
 
-void print_subtree_val(Node * subroot){
+void SplayTree:: print_subtree_rank(SplayTree::Node * subroot){
   if (subroot == NULL) return;
-  print_subtree_val(subroot->left);
+  SplayTree:: print_subtree_rank(subroot->left);
+  cout << get_rank(subroot) << endl;
+  SplayTree:: print_subtree_rank(subroot->right);
+}
+
+void SplayTree:: print_subtree_val(SplayTree::Node * subroot){
+  if (subroot == NULL) return;
+  SplayTree:: print_subtree_val(subroot->left);
   cout << subroot->val << endl;
-  print_subtree_val(subroot->right);
+  SplayTree:: print_subtree_val(subroot->right);
 }
-
 
 
