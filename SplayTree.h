@@ -36,6 +36,10 @@ class SplayTree
     void print_val();
     
     void print_rank();
+    
+    Node * max(Node * subroot);
+
+    Node * min(Node * subroot);
 
     //Assumes trees disjoint
     Node * join(Node * left, Node * right);
@@ -54,9 +58,6 @@ class SplayTree
 
     Node * no_splay_insert(Node * subroot, int rank, int val, Node * p);
 
-    Node * max(Node * subroot);
-
-    Node * min(Node * subroot);
 
     void print_subtree_rank(Node * subroot);
 

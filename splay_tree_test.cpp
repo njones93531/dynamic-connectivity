@@ -27,10 +27,29 @@ void simple_test_rank(int x){
     cout << " passed." << endl;
 }
 
+void simple_test_max(){
+  cout << "Simple test max";
+  tree->max(tree->root);
+  if(tree->get_rank(tree->root) != tree->get_subtree_size(tree->root)-1)
+    cout << " failed. Expected rank " << tree->root->subtree_size -1 << ", got rank " << tree->get_rank(tree->root) << endl;
+  else 
+    cout << " passed." << endl;
+}
+
+void simple_test_min(){
+  cout << "Simple test min";
+  tree->min(tree->root);
+  if(tree->get_rank(tree->root) != 0)
+    cout << " failed. Expected rank " << 0 << ", got rank " << tree->get_rank(tree->root) << endl;
+  else 
+    cout << " passed." << endl;
+}
+
 void simple_test_delete(int x){
   cout << "Simple test delete";
   int orig_size = tree->root->subtree_size;
-  tree->print_rank();
+  //tree->print_rank();
+  tree->del(x);
   if(tree->root->subtree_size != orig_size - 1)
     cout << " failed. Expected size " << orig_size - 1 << ", got size " << tree->root->subtree_size << endl;
   else 
@@ -41,9 +60,9 @@ void simple_test_delete_insert(int x){
   cout << "Simple test delete insert";
   int orig_size = tree->root->subtree_size;
   tree->find_rank(x);
-  SplayTree::Node * a = tree->root;
-  tree->del(tree->get_rank(a));
-  tree->insert(x, a->val);
+  int val = tree->root->val;
+  tree->del(tree->get_rank(tree->root));
+  tree->insert(x, val);
   if(tree->root->subtree_size != orig_size)
     cout << " failed. Expected size " << orig_size << ", got size " << tree->root->subtree_size << endl;
   else 
@@ -54,12 +73,11 @@ void simple_test_delete_insert(int x){
 
 void simple_test_split_join(int x){
   cout << "Simple split join" << endl;
-  tree->print_rank();
   SplayTree::Node * a;
   SplayTree::Node * b = tree->root;
   tree->split(x, tree->root, &a, &b);
-  tree->join(a, tree->root);
-  tree->print_rank();
+  tree->root = tree->join(a, b);
+  tree->print_val();
   cout << "Are they equal?" << endl;
 }
 
@@ -81,8 +99,18 @@ int main()
     for(int i = 0; i < 10; i++){
       int rank = rand() % 10;
       simple_test_rank(rank);
-      tree->print_val();
     }
+    tree->print_val();
+
+
+    for(int i = 0; i < 10; i++){
+      int do_max = rand() % 2;
+      if(do_max) simple_test_max();
+      else simple_test_min();
+    }
+    tree->print_val();
+
+
 
     for(int i = 0; i < 3; i++){
       int rank = rand() % tree->root->subtree_size;

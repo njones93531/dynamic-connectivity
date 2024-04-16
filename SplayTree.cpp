@@ -1,4 +1,5 @@
 #include <iostream>
+#include <climits>
 #include "SplayTree.h"
 using namespace std;
  
@@ -30,8 +31,14 @@ void SplayTree:: del(int rank){
   //After rank, e is at root
   SplayTree::find_rank(rank);
   SplayTree::Node * e = root;
-  root = SplayTree::join(e->left, e->right);
+  SplayTree::Node * A = e->left;
+  SplayTree::Node * B = e->right;
+  if(A) A->parent = NULL;
+  if(B) B->parent = NULL;
+  e->left = NULL;
+  e->right = NULL;
   delete e;
+  root = SplayTree::join(A, B);
 }
 
 void SplayTree:: print_val(){
@@ -110,7 +117,7 @@ SplayTree::Node * SplayTree:: no_splay_rank(SplayTree::Node * subroot, int rank)
 
 SplayTree::Node * SplayTree:: no_splay_insert(SplayTree::Node * subroot, int rank, int val, Node* p){
   if(subroot==NULL) return new SplayTree::Node(val, p);
-  if(rank < get_rank(subroot)){
+  if(rank <= get_rank(subroot)){
     subroot->left = SplayTree:: no_splay_insert(subroot->left, rank, val, subroot);
   }else{
     subroot->right = SplayTree:: no_splay_insert(subroot->right, rank - (1+get_subtree_size(subroot->left)), val, subroot); 
@@ -120,30 +127,33 @@ SplayTree::Node * SplayTree:: no_splay_insert(SplayTree::Node * subroot, int ran
 }
 
 SplayTree::Node * SplayTree:: max(SplayTree::Node * subroot){
-  if(subroot == NULL) return NULL;
-  if(subroot->right == NULL) return subroot;
-  return SplayTree:: splay(max(subroot->right));
+  return SplayTree::splay(no_splay_rank(subroot, get_subtree_size(subroot)-1));
 }
 
 SplayTree::Node * SplayTree:: min(SplayTree::Node * subroot){
-  if(subroot == NULL) return NULL;
-  if(subroot->left == NULL) return subroot;
-  return SplayTree:: splay(min(subroot->left));
+  return SplayTree::splay(no_splay_rank(subroot, 0));
 }
 
-SplayTree::Node * SplayTree:: join(SplayTree::Node * left, SplayTree::Node * right){       
+SplayTree::Node * SplayTree:: join(SplayTree::Node * left, SplayTree::Node * right){
+  if(left == NULL) return right;
+  if(right == NULL) return left;
+  left->parent = NULL;
+  right->parent = NULL;
   left = SplayTree:: max(left);
   left->right = right;
+  right->parent = left;
+  left->subtree_size += get_subtree_size(left->right);
   return left;
 }
 
 void SplayTree:: split(int rank, SplayTree::Node * subroot, SplayTree::Node ** a, SplayTree::Node ** b){       
   //Splay the element with rank *rank* to the root
   find_rank(rank);
-  root->right->parent = NULL;
+  if(root->right) root->right->parent = NULL;
   *b = root->right; 
   root->right = NULL;
   *a = root;
+  if(*a) (*a)->subtree_size -= get_subtree_size(*b);
 }
 
 void SplayTree:: print_subtree_rank(SplayTree::Node * subroot){
