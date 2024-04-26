@@ -13,7 +13,7 @@ Code:
 - Forest.cpp/Forest.h: Implementation of dynamic connectivity in a forest using euler tour splay trees.
 -   Note: delete_edge() is more powerful than required; delete_edge(a, b) will delete node b's outgoing edge that connects to a's tree, regardless of whether a and b share an edge. The runtime is still O(logn).
 - forest_test.cpp/forest_time.cpp/splay_tree_test.cpp: Testing scripts that compile into the binaries above.
-- plot.py: Written with aid of ChatGPT. Generates a plot with matplotlib demonstrating all functions run in O(logn) time.
+- plot.py: usage: `python3 plot.py time.out` Written with aid of ChatGPT. Generates a plot with matplotlib demonstrating all functions run in O(logn) time.
 
 Correctness: 
 - splay_tree_test.exe runs a relatively extensive randomized testing suite that covers all relevant functions. Some tests may require visual confirmation for correctness.
