@@ -4,16 +4,20 @@ CXXFLAGS = -std=c++11 -Wall -ggdb
 SOURCES = SplayTree.cpp splay_tree_test.cpp 
 OBJECTS = $(SOURCES:.cpp=.o)
 
-all: splay_tree_test.exe
+all: splay_tree_test.exe forest_test.exe forest_time.exe
 
-test: splay_tree_test.exe
+splay_tree_test.exe: SplayTree.o splay_tree_test.o
+	$(CXX) $(CXXFLAGS) -o $@ SplayTree.o splay_tree_test.o
 
-splay_tree_test.exe: $(OBJECTS)
-	$(CXX) $(CXXFLAGS) -o $@ $(OBJECTS)
+forest_test.exe: Forest.o SplayTree.o forest_test.o
+	$(CXX) $(CXXFLAGS) -o $@ Forest.o SplayTree.o forest_test.o
+
+forest_time.exe: Forest.o SplayTree.o forest_time.o
+	$(CXX) $(CXXFLAGS) -o $@ Forest.o SplayTree.o forest_time.o
 
 .cpp.o: 
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:
-	rm -f splay_tree_test.exe $(OBJECTS)
+	rm -f *.exe *.o
 

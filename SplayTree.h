@@ -1,6 +1,7 @@
 #ifndef SPLAY_TREE_H
 #define SPLAY_TREE_H
 #include <iostream>
+#include <vector>
 using namespace std;
 class SplayTree
 {
@@ -19,23 +20,31 @@ class SplayTree
         this->subtree_size = 1;
       }
     } Node;
-    Node * root; 
     SplayTree();
+    ~SplayTree() {
+      for(SplayTree::Node* a : SplayTree::nodes){
+        if(a) delete a;
+      }
+    delete &nodes;
+}
+
      
-    void find_rank(int rank);
+    Node * find_rank(int rank, Node * root);
     
-    int get_rank(Node * a);
+    int get_local_rank(Node * a);
 
     int get_subtree_size(Node * e);
 
     //Assumes no duplicate ranks
-    void insert(int rank, int val);
+    Node * insert(int rank, int val, Node * root);
 
-    void del(int rank);
-
-    void print_val();
+    Node * del(int rank, Node * root);
     
-    void print_rank();
+    Node * del(Node * e);
+
+    void print_val(Node * root);
+    
+    void print_rank(Node * root);
     
     Node * max(Node * subroot);
 
@@ -45,19 +54,21 @@ class SplayTree
     Node * join(Node * left, Node * right);
     
     void split(int rank, Node * root, Node ** a, Node **b);
+    
+    Node * splay(Node * e);
+
+    void delete_tree(Node * root);
   
   private:
-    
+    vector<Node *> nodes;
+
     //Assume e is the child of a non-null node
     void rotate_up(Node * e);
-
-    Node * splay(Node * e);
 
     //Return e if it exists, otherwise return NULL
     Node * no_splay_rank(Node * subroot, int rank);
 
     Node * no_splay_insert(Node * subroot, int rank, int val, Node * p);
-
 
     void print_subtree_rank(Node * subroot);
 
