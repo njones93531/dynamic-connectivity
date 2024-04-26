@@ -20,4 +20,5 @@ Correctness:
 - forest_test.exe runs a relatively extensive randomized testing suite that covers all relevant functions. Some tests may require visual confirmation for correctness.
 
 Other: 
-BigO.png shows that the average runtime of an operation does not increase significantly as the log of N increases. Therfore, we can conclude that all operations run in O(logn). 
+- BigO.png shows that the average runtime of an operation does not increase significantly as the log of N increases. Therfore, we can conclude that all operations run in O(logn).
+- time.out contains the timings used to generate BigO.png.
