@@ -4,6 +4,10 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
+if len(sys.argv) < 2:
+    print("Usage: python3 plot.py <input data>")
+    exit(0)
+
 df = pd.read_csv(sys.argv[1])
 grouped = df.groupby('test_name')
 
